@@ -25,6 +25,8 @@ https://documentation.botcity.dev/tutorials/python-automations/web/
 # Import for the Web Bot
 from botcity.web import WebBot, Browser, By
 
+import pandas
+
 # Import for integration with BotCity Maestro SDK
 from botcity.maestro import *
 
@@ -33,6 +35,17 @@ BotMaestroSDK.RAISE_NOT_CONNECTED = False
 
 
 def main():
+    
+    uxPath = "/html/body/app-root/div[2]/app-rpa1/div/div[1]/div[6]/button"
+    InputsDicionary = {
+        "inputCompanyRole": '//input[@ng-reflect-name="labelRole"]',
+        "inputFirstName": '//input[@ng-reflect-name="labelFirstName"]',
+        "inputLastName": '//input[@ng-reflect-name="labelLastName"]',
+        "inputAdress": '//input[@ng-reflect-name="labelAddress"]',
+        "inputCompanyName": '//input[@ng-reflect-name="labelCompanyName"]',
+        "inputEmail": '//input[@ng-reflect-name="labelEmail"]',
+        "inputPhone": '//input[@ng-reflect-name="labelPhone"]'
+    }
     # Runner passes the server url, the id of the task being executed,
     # the access token and the parameters that this task receives (when applicable).
     maestro = BotMaestroSDK.from_sys_args()
@@ -48,16 +61,28 @@ def main():
     bot.headless = False
 
     # Uncomment to change the default Browser to Firefox
-    # bot.browser = Browser.FIREFOX
+    bot.browser = Browser.CHROME
 
     # Uncomment to set the WebDriver path
-    # bot.driver_path = "<path to your WebDriver binary>"
+    bot.driver_path = r"C:\Users\nulle\Downloads\crhomedriver\chromedriver.exe"
 
     # Opens the BotCity website.
-    bot.browse("https://www.botcity.dev")
-
+    bot.browse("https://rpachallenge.com/")
+    bot.maximize_window()
+    buttonStart = bot.find_element(uxPath, by=By.XPATH)
+    buttonStart.click()
     # Implement here your logic...
-    ...
+    savingExcel = pandas.read_excel(r"D:\PythonProjects\PythonProjectRPA\rpa_challenge\challenge.xlsx")
+
+    for index, row in savingExcel.iterrows():
+        bot.find_element(InputsDicionary["inputFirstName"], by=By.XPATH).send_keys(row['First Name'])
+        bot.find_element(InputsDicionary["inputLastName"], by=By.XPATH).send_keys(row['Last Name '])
+        bot.find_element(InputsDicionary["inputAdress"], by=By.XPATH).send_keys(row['Address'])
+        bot.find_element(InputsDicionary["inputCompanyName"], by=By.XPATH).send_keys(row['Company Name'])
+        bot.find_element(InputsDicionary["inputEmail"], by=By.XPATH).send_keys(row['Email'])
+        bot.find_element(InputsDicionary["inputPhone"], by=By.XPATH).send_keys(row['Phone Number'])
+        bot.find_element(InputsDicionary["inputCompanyRole"], by=By.XPATH).send_keys(row['Role in Company'])
+        bot.find_element("/html/body/app-root/div[2]/app-rpa1/div/div[2]/form/input", by=By.XPATH).click()
 
     # Wait 3 seconds before closing
     bot.wait(3000)
